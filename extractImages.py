@@ -43,10 +43,5 @@ def extractImages(productID: str):
     dir.mkdir(parents=True, exist_ok=True)
     output_file = dir / f"{productID.replace('.html', '')}.jpg"
     downloadImage(img_url, str(output_file)) 
-        
-
-
-
-if __name__ == "__main__":
-    extractImages("keyword_28_product_001.html")
+    
 

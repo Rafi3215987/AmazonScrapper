@@ -2,6 +2,8 @@ from urllib.parse import quote_plus
 import pandas as pd
 import time
 from parseReview import parseReview
+from extractImages import extractImages
+from parsePriceRelatedFeatures import parsePriceRelatedFeatures
 from bs4 import BeautifulSoup
 from read_file import read_file
 from pathlib import Path
@@ -15,7 +17,7 @@ def extract_reviews():
         filename: str = str(html.name)
         reviews = parseReview(filename)
         productName = BeautifulSoup(open(html, encoding="utf-8"), "html.parser").select_one("span#productTitle").get_text(strip=True)
-        print(productName)
+        #print(productName)
             
         data = {
             "productName": productName,
@@ -27,14 +29,33 @@ def extract_reviews():
     df = pd.DataFrame(review_data)
     df.to_csv("data/reviews.csv", index=False, encoding="utf-8-sig")
 
+def extract_images():
+    products_dir = Path("data/products")
+    for html in products_dir.glob("*.html"):
+        filename: str = str(html.name)
+        extractImages(filename)
+
+
+def extract_price_related_features():
+    products_dir = Path("data/products")
+    product_data = []
+    for html in products_dir.glob("*.html"):
+        filename: str = str(html.name)
+        product_features = parsePriceRelatedFeatures(filename)
+        product_data.append(product_features)
+
+    df = pd.DataFrame(product_data)
+    df.to_csv("data/priceRelatedFeatures.csv", index=False, encoding="utf-8-sig")
+
 
 
 
 def main():
     #FEATURE A
     #FEATURE B
-    extract_reviews()
-    
+    #extract_reviews()
+    #extract_images()
+    extract_price_related_features()
 
 #     df = read_file();
 #     for indx, row in df.iterrows():
