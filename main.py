@@ -22,8 +22,10 @@ def extract_reviews():
         productName = BeautifulSoup(open(html, encoding="utf-8"), "html.parser").select_one("span#productTitle").get_text(strip=True)
         #print(productName)
         keyword =  int(filename[8:10])
+        print(keyword)
+        print(" "+search_keywords[keyword-1])
         data = {
-            "category": search_keywords[keyword],
+            "category": search_keywords[keyword-1],
             "productName": productName,
             "reviews": json.dumps(reviews, ensure_ascii=False, indent=4)
         }
@@ -57,9 +59,9 @@ def extract_price_related_features():
 def main():
     #FEATURE A
     #FEATURE B
-    extract_reviews()
+    #extract_reviews()
     #extract_images()
-    #extract_price_related_features()
+    extract_price_related_features()
 
 #     df = read_file();
 #     for indx, row in df.iterrows():

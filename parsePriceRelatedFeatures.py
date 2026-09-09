@@ -1,5 +1,8 @@
 from bs4 import BeautifulSoup
 from logger import logger
+from read_file import read_file
+
+search_keywords = read_file()["Search Keywords"].tolist()
 
 def parsePriceRelatedFeatures(productID: str) -> dict:
     with open(
@@ -11,9 +14,21 @@ def parsePriceRelatedFeatures(productID: str) -> dict:
     title = productPage.select_one("span#productTitle").get_text(strip=True)
     rating = productPage.select_one("span#acrPopover").get_text(strip=True)[:3]
     ratingCount = productPage.select_one("span#acrCustomerReviewText").get_text(strip=True)
-    brandName = productPage.select_one("tr.po-brand span.a-size-base.po-break-word").get_text(strip=True)
+    brandName = None
     description = productPage.select_one("div#feature-bullets").get_text(strip=True)
-    category = productPage.select_one("a[aria-current='page']").get_text(strip=True)
+    print(int(productID[8:10]))
+    category = search_keywords[int(productID[8:10])-1]
+
+    for row in productPage.select("table.prodDetTable tr"):
+        key = row.find("th")
+
+        if key and key.get_text(strip=True) == "Brand":
+            value = row.find("td")
+            if value:
+                brandName = value.get_text(strip=True)
+            break
+
+    #print(brandName)
 
     product = {
         "category": category,
