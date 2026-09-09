@@ -4,10 +4,13 @@ import time
 from parseReview import parseReview
 from extractImages import extractImages
 from parsePriceRelatedFeatures import parsePriceRelatedFeatures
+from read_file import read_file
 from bs4 import BeautifulSoup
 from read_file import read_file
 from pathlib import Path
 import json
+
+search_keywords = read_file()["Search Keywords"].tolist()
 
 def extract_reviews():
     #FEATURE B
@@ -18,8 +21,9 @@ def extract_reviews():
         reviews = parseReview(filename)
         productName = BeautifulSoup(open(html, encoding="utf-8"), "html.parser").select_one("span#productTitle").get_text(strip=True)
         #print(productName)
-            
+        keyword =  int(filename[8:10])
         data = {
+            "category": search_keywords[keyword],
             "productName": productName,
             "reviews": json.dumps(reviews, ensure_ascii=False, indent=4)
         }
@@ -53,9 +57,9 @@ def extract_price_related_features():
 def main():
     #FEATURE A
     #FEATURE B
-    #extract_reviews()
+    extract_reviews()
     #extract_images()
-    extract_price_related_features()
+    #extract_price_related_features()
 
 #     df = read_file();
 #     for indx, row in df.iterrows():
