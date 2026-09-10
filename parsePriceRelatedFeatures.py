@@ -4,6 +4,11 @@ from read_file import read_file
 
 search_keywords = read_file()["Search Keywords"].tolist()
 
+def get_text_or_none(product_page: BeautifulSoup, selector: str):
+    element = product_page.select_one(selector)
+    return element.get_text(strip=True) if element else None
+
+
 def parsePriceRelatedFeatures(productID: str) -> dict:
     with open(
             f"data/products/{productID}",
@@ -11,13 +16,17 @@ def parsePriceRelatedFeatures(productID: str) -> dict:
         ) as file:
             productPage = BeautifulSoup(file, "html.parser")
 
-    title = productPage.select_one("span#productTitle").get_text(strip=True)
-    rating = productPage.select_one("span#acrPopover").get_text(strip=True)[:3]
-    ratingCount = productPage.select_one("span#acrCustomerReviewText").get_text(strip=True)
+    title = get_text_or_none(productPage, "span#productTitle")
+    rating = get_text_or_none(productPage, "span#acrPopover")
+    if rating:
+        rating = rating[:3]
+    ratingCount = get_text_or_none(productPage, "span#acrCustomerReviewText")
     brandName = None
-    description = productPage.select_one("div#feature-bullets").get_text(strip=True)
-    print(int(productID[8:10]))
-    category = search_keywords[int(productID[8:10])-1]
+    description = get_text_or_none(productPage, "div#feature-bullets")
+    category_index = int(productID[8:10]) - 1
+    category = search_keywords[category_index] if category_index < len(search_keywords) else None
+
+    price = get_text_or_none(productPage, "span#apex-pricetopay-accessibility-label")
 
     for row in productPage.select("table.prodDetTable tr"):
         key = row.find("th")
@@ -38,7 +47,6 @@ def parsePriceRelatedFeatures(productID: str) -> dict:
         "ratingCount": ratingCount,
         "description": description
     }
-    print(product)
     return product
 
 if __name__ == "__main__":

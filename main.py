@@ -51,7 +51,14 @@ def extract_price_related_features():
         product_data.append(product_features)
 
     df = pd.DataFrame(product_data)
-    df.to_csv("data/priceRelatedFeatures.csv", index=False, encoding="utf-8-sig")
+    null_rows = int(df.isna().any(axis=1).sum())
+    print(f"Rows containing null values: {null_rows}")
+    df.to_csv(
+        "data/priceRelatedFeatures.csv",
+        index=False,
+        encoding="utf-8-sig",
+        na_rep="null"
+    )
 
 
 

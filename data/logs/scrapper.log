@@ -8343,3 +8343,11 @@ FileNotFoundError: [Errno 2] No such file or directory: 'D:\\Amazon Scrapper\\Am
 2026-09-09 17:01:55 | INFO | amazon_scrapper | Read 28 rows from keyword workbook
 2026-09-09 17:01:55 | INFO | amazon_scrapper | Reading keyword workbook: data/Search Keyword Lists.xlsx
 2026-09-09 17:01:55 | INFO | amazon_scrapper | Read 28 rows from keyword workbook
+2026-09-10 08:45:46 | INFO | amazon_scrapper | Reading keyword workbook: data/Search Keyword Lists.xlsx
+2026-09-10 08:45:47 | INFO | amazon_scrapper | Read 28 rows from keyword workbook
+2026-09-10 08:45:47 | INFO | amazon_scrapper | Reading keyword workbook: data/Search Keyword Lists.xlsx
+2026-09-10 08:45:47 | INFO | amazon_scrapper | Read 28 rows from keyword workbook
+2026-09-10 08:49:27 | INFO | amazon_scrapper | Reading keyword workbook: data/Search Keyword Lists.xlsx
+2026-09-10 08:49:28 | INFO | amazon_scrapper | Read 28 rows from keyword workbook
+2026-09-10 08:49:28 | INFO | amazon_scrapper | Reading keyword workbook: data/Search Keyword Lists.xlsx
+2026-09-10 08:49:28 | INFO | amazon_scrapper | Read 28 rows from keyword workbook
