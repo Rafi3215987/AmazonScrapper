@@ -68,7 +68,21 @@ def main():
     #FEATURE B
     #extract_reviews()
     #extract_images()
-    extract_price_related_features()
+    
+    #extract_price_related_features()
+    df = pd.read_csv("data/priceRelatedFeatures.csv")
+    #print(df.isnull().sum())
+
+    sub_df = df[
+        ["category", "brand", "price", "description", "title"]
+    ]
+
+    sub_df.to_csv(
+        "data/similarityRelatedFeatures.csv",
+        index=False,
+        encoding="utf-8-sig",
+        na_rep="null"
+    )
 
 #     df = read_file();
 #     for indx, row in df.iterrows():

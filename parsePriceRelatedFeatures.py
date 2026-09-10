@@ -21,23 +21,35 @@ def parsePriceRelatedFeatures(productID: str) -> dict:
     if rating:
         rating = rating[:3]
     ratingCount = get_text_or_none(productPage, "span#acrCustomerReviewText")
-    brandName = None
+    
     description = get_text_or_none(productPage, "div#feature-bullets")
     category_index = int(productID[8:10]) - 1
     category = search_keywords[category_index] if category_index < len(search_keywords) else None
 
     price = get_text_or_none(productPage, "span#apex-pricetopay-accessibility-label")
 
-    for row in productPage.select("table.prodDetTable tr"):
-        key = row.find("th")
-
-        if key and key.get_text(strip=True) == "Brand":
-            value = row.find("td")
-            if value:
-                brandName = value.get_text(strip=True)
+    brandName = None
+    for row in productPage.select("table tr"):
+        label = row.find("span", class_="a-text-bold")
+    
+        if label and label.get_text(strip=True) == "Brand":
+            value = row.find_all("td")[1]
+            brand = value.get_text(strip=True)
+            brandName = brand
             break
 
-    #print(brandName)
+    print(f"Product ID: {productID}")
+    if brandName is None:
+        for row in productPage.select("table.prodDetTable tr"):
+            key = row.find("th")
+    
+            if key and key.get_text(strip=True) == "Brand":
+                value = row.find("td")
+                if value:
+                    brandName = value.get_text(strip=True)
+                break
+
+    print(brandName)
 
     product = {
         "category": category,
@@ -45,9 +57,10 @@ def parsePriceRelatedFeatures(productID: str) -> dict:
         "brand": brandName,
         "rating": rating,
         "ratingCount": ratingCount,
-        "description": description
+        "description": description,
+        "price": price
     }
     return product
 
 if __name__ == "__main__":
-    parsePriceRelatedFeatures("keyword_01_product_003.html")
+    parsePriceRelatedFeatures("keyword_28_product_048.html")
