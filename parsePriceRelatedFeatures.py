@@ -12,11 +12,12 @@ def parsePriceRelatedFeatures(productID: str) -> dict:
             productPage = BeautifulSoup(file, "html.parser")
 
     title = productPage.select_one("span#productTitle").get_text(strip=True)
-    rating = productPage.select_one("span#acrPopover").get_text(strip=True)[:3]
+    rating = productPage.select_one("span.a-icon-alt").get_text(strip=True)[:3]
     ratingCount = productPage.select_one("span#acrCustomerReviewText").get_text(strip=True)
     brandName = None
     description = productPage.select_one("div#feature-bullets").get_text(strip=True)
     print(int(productID[8:10]))
+    print(int(productID[20:22]))
     category = search_keywords[int(productID[8:10])-1]
 
     for row in productPage.select("table.prodDetTable tr"):
@@ -42,4 +43,4 @@ def parsePriceRelatedFeatures(productID: str) -> dict:
     return product
 
 if __name__ == "__main__":
-    parsePriceRelatedFeatures("keyword_04_product_008.html")
+    parsePriceRelatedFeatures("keyword_01_product_003.html")
