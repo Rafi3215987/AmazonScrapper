@@ -50,4 +50,4 @@ def parsePriceRelatedFeatures(productID: str) -> dict:
     return product
 
 if __name__ == "__main__":
-    parsePriceRelatedFeatures("keyword_04_product_008.html")
+    parsePriceRelatedFeatures("keyword_01_product_003.html")
