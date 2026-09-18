@@ -1,11 +1,11 @@
 from pathlib import Path
 import re
+import pickle
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 from PIL import Image
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
@@ -35,6 +35,28 @@ def load_similarity_data():
         frame["title"] + " " + frame["description"] + " " + frame["brand"]
     )
     return frame
+
+
+@st.cache_resource
+def load_sbert_artifact():
+    artifact_path = DATA_DIR / "amazon_sbert_model.pkl"
+    if not artifact_path.exists():
+        raise FileNotFoundError(
+            f"SBERT artifact not found: {artifact_path}. Run the SBERT cells in FeatureA.ipynb first."
+        )
+    with artifact_path.open("rb") as file:
+        artifact = pickle.load(file)
+    products = artifact["products"].copy()
+    for column in ["category", "brand", "description", "title"]:
+        products[column] = products[column].fillna("").astype(str)
+    products["price_value"] = products["price"].astype(str).str.extract(
+        r"\$([\d,]+(?:\.\d+)?)"
+    )[0]
+    products["price_value"] = pd.to_numeric(
+        products["price_value"].str.replace(",", "", regex=False),
+        errors="coerce",
+    )
+    return artifact["model"], np.asarray(artifact["product_embeddings"]), products
 
 
 @st.cache_data
@@ -111,13 +133,13 @@ def load_images():
 
 
 def show_header():
-    st.title("Amazon Feature Lab")
+    st.title("Amazon Feature Lab - From Scrapped Data")
     st.caption("Explore product similarity, review sentiment, visual assets, and pricing patterns from the scraped catalog.")
 
 
-def feature_a(frame):
+def feature_a(frame, sbert_model, product_embeddings):
     st.subheader("Feature A: Similar products")
-    st.write("Search the product catalog with title, description, brand, and category-aware TF-IDF similarity.")
+    st.write("Search the product catalog with SBERT semantic similarity across product titles and descriptions.")
     query = st.text_input("Product or use-case", "wireless headphones", key="feature_a_query")
     category = st.selectbox(
         "Category filter",
@@ -126,14 +148,17 @@ def feature_a(frame):
     )
     result_count = st.slider("Results", 5, 20, 10, key="feature_a_count")
 
-    candidates = frame if category == "All categories" else frame[frame["category"] == category]
+    candidate_mask = (
+        pd.Series(True, index=frame.index)
+        if category == "All categories"
+        else frame["category"].eq(category)
+    )
+    candidates = frame.loc[candidate_mask]
     if candidates.empty:
         st.info("No products match that category.")
         return
-    vectorizer = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), max_features=8000)
-    matrix = vectorizer.fit_transform(candidates["search_text"])
-    query_vector = vectorizer.transform([query])
-    scores = cosine_similarity(query_vector, matrix).ravel()
+    query_embedding = sbert_model.encode([query], normalize_embeddings=True)[0]
+    scores = product_embeddings[candidate_mask.to_numpy()] @ query_embedding
     results = candidates.copy()
     results["similarity"] = scores
     results = results.sort_values("similarity", ascending=False).head(result_count)
@@ -230,12 +255,17 @@ def feature_d(frame):
 def main():
     show_header()
     similarity = load_similarity_data()
+    try:
+        sbert_model, product_embeddings, similarity_products = load_sbert_artifact()
+    except Exception as error:
+        st.error(str(error))
+        st.stop()
     price = load_price_data()
     raw_reviews, reviews = load_reviews()
     images = load_images()
     tabs = st.tabs(["Feature A | Similarity", "Feature B | Reviews", "Feature C | Images", "Feature D | Pricing"])
     with tabs[0]:
-        feature_a(similarity)
+        feature_a(similarity_products, sbert_model, product_embeddings)
     with tabs[1]:
         feature_b(raw_reviews, reviews)
     with tabs[2]:
